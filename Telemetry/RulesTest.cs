@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 
 using System;
-using System.Collections.Generic;
 using System.Net;
 using Helpers.Http;
 using Newtonsoft.Json.Linq;
@@ -13,6 +12,10 @@ namespace Telemetry
     {
         private readonly IHttpClient httpClient;
         private const string TELEMETRY_ADDRESS = "http://127.0.0.1:9004/v1";
+        private const string CONFIG_ADDRESS = "http://127.0.0.1:9005/v1";
+        private const string DEFAULT_CHILLERS_GROUP_ID = "default_Chillers";
+        private const int SEED_DATA_RETRY_COUNT = 3;
+
         private string instantRuleId;
         private string average1MinRuleId;
         private string average5MinRuleId;
@@ -52,15 +55,16 @@ namespace Telemetry
         public void CreatesRuleWithInstantCalculation_IfValid()
         {
             // Arrange
-            // wait for config to run seed data for device groups
-            //System.Threading.Thread.Sleep(60000);
+
+            // Make sure device groups have been created by seed data
+            Assert.True(this.ValidChillerGroup());
 
             // Create a rule with instant calculation
             var body = JObject.Parse(@"{  
                'Name': 'Instant Rule',
                'Description': 'Instant Description',
-               'GroupId': 'default_Chillers',
-               'Severity': 'info',
+               'GroupId': '" + DEFAULT_CHILLERS_GROUP_ID + @"',
+               'Severity': 'Info',
                'Enabled': true,
                'Calculation': 'Instant',
                'TimePeriod': '0',
@@ -85,24 +89,39 @@ namespace Telemetry
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             JObject jsonResponse = JObject.Parse(response.Content);
             Assert.True(jsonResponse.HasValues);
+            Assert.Equal(body.GetValue("Name"), jsonResponse.GetValue("Name"));
+            Assert.Equal(body.GetValue("Description"), jsonResponse.GetValue("Description"));
+            Assert.Equal(body.GetValue("GroupId"), jsonResponse.GetValue("GroupId"));
+            Assert.Equal(body.GetValue("Severity"), jsonResponse.GetValue("Severity"));
+            Assert.Equal(body.GetValue("Enabled"), jsonResponse.GetValue("Enabled"));
+            Assert.Equal(body.GetValue("Calculation"), jsonResponse.GetValue("Calculation"));
+            Assert.Equal(body.GetValue("Conditions"), jsonResponse.GetValue("Conditions"));
+        }
 
-            /*
-            JArray items = (JArray)jsonResponse["Items"];
-            //TODO: Make it equal to 5 once fresh storage is created
-            //Since we are using same storage account for now this number should be great or equal to 5
-            Assert.True(items.Count >= 4);
-
-            List<string> groupIds = new List<string>();
-            foreach (var rule in items)
+        /// <summary>
+        /// Returns true if the default chiller device group has been created by seed data.
+        /// Retries 3 times with a 30 sec timer if seed data in config service has not yet
+        /// created the device groups. Returns false after SEED_DATA_RETRY_COUNT failed attempts.
+        /// </summary>
+        private bool ValidChillerGroup()
+        {
+            for (var i = 0; i < SEED_DATA_RETRY_COUNT; i++)
             {
-                groupIds.Add(rule["GroupId"].ToString());
+                var chillerRequest = new HttpRequest(CONFIG_ADDRESS + "/devicegroups/" + DEFAULT_CHILLERS_GROUP_ID);
+                chillerRequest.AddHeader("X-Foo", "Bar");
+
+                var response = this.httpClient.GetAsync(chillerRequest).Result;
+
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    return true;
+                }
+
+                // wait 30 seconds before retry if able
+                if (i < SEED_DATA_RETRY_COUNT-1) System.Threading.Thread.Sleep(30000);
             }
 
-            Assert.Contains("default_Chillers", groupIds);
-            Assert.Contains("default_PrototypingDevices", groupIds);
-            Assert.Contains("default_Trucks", groupIds);
-            Assert.Contains("default_Elevators", groupIds);
-            */
-        }
+            return false;
+        } 
     }
 }
