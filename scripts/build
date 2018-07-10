@@ -14,11 +14,13 @@ fi
 
 echo "The repo name is: " $2
 
-./IoTHubManager/run.sh "IoT Hub Manager tests"
+./StorageAdapter/run.sh "Storage Adapter tests"
 
 ./PcsConfig/run.sh "Pcs Config tests"
 
-./StorageAdapter/run.sh "Storage Adapter Tests"
+./IoTHubManager/run.sh "IoT Hub Manager tests"
+
+./ASAManager/run.sh "ASA Manager tests"
 
 ./Telemetry/run.sh "Telemetry tests"
 
