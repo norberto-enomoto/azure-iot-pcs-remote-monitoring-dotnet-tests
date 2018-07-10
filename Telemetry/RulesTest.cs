@@ -14,7 +14,8 @@ namespace Telemetry
         private const string TELEMETRY_ADDRESS = "http://127.0.0.1:9004/v1";
         private const string CONFIG_ADDRESS = "http://127.0.0.1:9005/v1";
         private const string DEFAULT_CHILLERS_GROUP_ID = "default_Chillers";
-        private const int SEED_DATA_RETRY_COUNT = 3;
+        private const int SEED_DATA_RETRY_COUNT = 5;
+        private const int SEED_DATA_RETRY_MSEC = 10000;
 
         private string instantRuleId;
         private string average1MinRuleId;
@@ -87,7 +88,7 @@ namespace Telemetry
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject jsonResponse = JObject.Parse(response.Content);
+            var jsonResponse = JObject.Parse(response.Content);
             Assert.True(jsonResponse.HasValues);
             Assert.Equal(body.GetValue("Name"), jsonResponse.GetValue("Name"));
             Assert.Equal(body.GetValue("Description"), jsonResponse.GetValue("Description"));
@@ -100,7 +101,7 @@ namespace Telemetry
 
         /// <summary>
         /// Returns true if the default chiller device group has been created by seed data.
-        /// Retries 3 times with a 30 sec timer if seed data in config service has not yet
+        /// Retries with a 10 sec timer if seed data in config service has not yet
         /// created the device groups. Returns false after SEED_DATA_RETRY_COUNT failed attempts.
         /// </summary>
         private bool ValidChillerGroup()
@@ -117,8 +118,8 @@ namespace Telemetry
                     return true;
                 }
 
-                // wait 30 seconds before retry if able
-                if (i < SEED_DATA_RETRY_COUNT-1) System.Threading.Thread.Sleep(30000);
+                // wait 10 seconds before retry if able
+                if (i < SEED_DATA_RETRY_COUNT-1) System.Threading.Thread.Sleep(SEED_DATA_RETRY_MSEC);
             }
 
             return false;
