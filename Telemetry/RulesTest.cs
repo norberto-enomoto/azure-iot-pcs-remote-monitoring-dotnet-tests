@@ -7,13 +7,15 @@ using Helpers;
 using Helpers.Http;
 using Helpers.Models;
 using Newtonsoft.Json;
+using System.Net;
+using Helpers;
+using Helpers.Http;
 using Xunit;
 
 namespace Telemetry
 {
     public class RulesTest
     {
-
         private readonly IHttpClient httpClient;
 
         private const string DEFAULT_CHILLERS_GROUP_ID = "default_Chillers";
@@ -26,15 +28,6 @@ namespace Telemetry
         public RulesTest()
         {
             this.httpClient = new HttpClient();
-
-            // setup unique ids for rules
-            //var timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
-            //const string TEST_RULE_PREFIX = "Integration_Test_";
-            //this.instantRuleId = TEST_RULE_PREFIX + "Instant_" + timestamp;
-            //this.average1MinRuleId = TEST_RULE_PREFIX + "Average_1_Min_" + timestamp;
-            //this.average5MinRuleId = TEST_RULE_PREFIX + "Average_5_Min_" + timestamp;
-            //this.average10MinRuleId = TEST_RULE_PREFIX + "Average_10_Min_" + timestamp;
-
             this.rulesCreated = new List<string>();
         }
 
@@ -70,7 +63,6 @@ namespace Telemetry
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
-
 
         [Fact, Trait(Constants.TEST, Constants.INTEGRATION_TEST)]
         public void CreatesRuleWithInstantCalculation_IfValid()
