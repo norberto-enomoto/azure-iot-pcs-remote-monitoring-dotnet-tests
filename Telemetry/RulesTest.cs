@@ -4,10 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using Helpers;
-using Helpers.Models;
 using Helpers.Http;
+using Helpers.Models;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace Telemetry
@@ -24,28 +23,25 @@ namespace Telemetry
         // list of rules to delete when tests are complete
         private List<string> rulesCreated;
 
-        private string instantRuleId;
-        private string average1MinRuleId;
-        private string average5MinRuleId;
-        private string average10MinRuleId;
-
         public RulesTest()
         {
             this.httpClient = new HttpClient();
 
             // setup unique ids for rules
-            var timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
-            const string TEST_RULE_PREFIX = "Integration_Test_";
-            this.instantRuleId = TEST_RULE_PREFIX + "Instant_" + timestamp;
-            this.average1MinRuleId = TEST_RULE_PREFIX + "Average_1_Min_" + timestamp;
-            this.average5MinRuleId = TEST_RULE_PREFIX + "Average_5_Min_" + timestamp;
-            this.average10MinRuleId = TEST_RULE_PREFIX + "Average_10_Min_" + timestamp;
+            //var timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
+            //const string TEST_RULE_PREFIX = "Integration_Test_";
+            //this.instantRuleId = TEST_RULE_PREFIX + "Instant_" + timestamp;
+            //this.average1MinRuleId = TEST_RULE_PREFIX + "Average_1_Min_" + timestamp;
+            //this.average5MinRuleId = TEST_RULE_PREFIX + "Average_5_Min_" + timestamp;
+            //this.average10MinRuleId = TEST_RULE_PREFIX + "Average_10_Min_" + timestamp;
 
             this.rulesCreated = new List<string>();
         }
 
         ~RulesTest()
         {
+            Console.WriteLine("Rules test cleanup: Deleting " + this.rulesCreated.Count + " rules.");
+
             foreach (var ruleId in this.rulesCreated)
             {
                 var request = new HttpRequest(Constants.TELEMETRY_ADDRESS + "/rules/" + ruleId);
@@ -202,6 +198,42 @@ namespace Telemetry
         }
 
         [Fact, Trait(Constants.TEST, Constants.INTEGRATION_TEST)]
+        public void GetRuleById_ReturnsRule()
+        {
+            string ruleId = "TESTRULEID" + DateTime.Now.ToString("yyyyMMddHHmmss");
+
+            // Arrange  
+            Assert.True(this.ValidChillerGroup()); // Make sure device groups have been created by seed data
+            var ruleRequest = this.GetSampleRuleWithCalculation("Average", "600000");
+
+            var request = new HttpRequest(Constants.TELEMETRY_ADDRESS + "/rules/" + ruleId);
+            request.AddHeader("X-Foo", "Bar");
+            request.AddHeader("Content-Type", "application/json");
+            request.SetContent(JsonConvert.SerializeObject(ruleRequest));
+
+            var newRule = this.httpClient.PostAsync(request).Result;
+
+            // Act
+            request = new HttpRequest(Constants.TELEMETRY_ADDRESS + "/rules/" + ruleId);
+            request.AddHeader("X-Foo", "Bar");
+
+            var response = this.httpClient.GetAsync(request).Result;
+            var ruleResponse = JsonConvert.DeserializeObject<RuleApiModel>(response.Content);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal(ruleRequest.Name, ruleResponse.Name);
+            Assert.Equal(ruleRequest.Description, ruleResponse.Description);
+            Assert.Equal(ruleRequest.GroupId, ruleResponse.GroupId);
+            Assert.Equal(ruleRequest.Severity, ruleResponse.Severity);
+            Assert.Equal(ruleRequest.Enabled, ruleResponse.Enabled);
+            Assert.Equal(ruleRequest.Calculation, ruleResponse.Calculation);
+            Assert.Equal(ruleRequest.Conditions[0].Field, ruleResponse.Conditions[0].Field);
+            Assert.Equal(ruleRequest.Conditions[0].Operator, ruleResponse.Conditions[0].Operator);
+            Assert.Equal(ruleRequest.Conditions[0].Value, ruleResponse.Conditions[0].Value);
+        }
+
+        [Fact, Trait(Constants.TEST, Constants.INTEGRATION_TEST)]
         public void PutCreatesRuleWithId_IfValid()
         {
             string ruleId = "TESTRULEID" + DateTime.Now.ToString("yyyyMMddHHmmss");
@@ -221,6 +253,7 @@ namespace Telemetry
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal(ruleRequest.Id, ruleResponse.Id);
             Assert.Equal(ruleRequest.Name, ruleResponse.Name);
             Assert.Equal(ruleRequest.Description, ruleResponse.Description);
             Assert.Equal(ruleRequest.GroupId, ruleResponse.GroupId);
@@ -232,6 +265,65 @@ namespace Telemetry
             Assert.Equal(ruleRequest.Conditions[0].Value, ruleResponse.Conditions[0].Value);
 
             this.rulesCreated.Add(ruleResponse.Id); // Track new rule for deletion
+        }
+
+        [Fact, Trait(Constants.TEST, Constants.INTEGRATION_TEST)]
+        public void PutUpdatesExistingRuleToDisabled_IfValid()
+        {
+            // Arrange  
+            Assert.True(this.ValidChillerGroup()); // Make sure device groups have been created by seed data
+            var newRuleRequest = this.GetSampleRuleWithCalculation("Average", "600000");
+
+            var request = new HttpRequest(Constants.TELEMETRY_ADDRESS + "/rules");
+            request.AddHeader("X-Foo", "Bar");
+            request.AddHeader("Content-Type", "application/json");
+            request.SetContent(JsonConvert.SerializeObject(newRuleRequest));
+
+            var newRuleResponse = this.httpClient.PostAsync(request).Result;
+            var newRule = JsonConvert.DeserializeObject<RuleApiModel>(newRuleResponse.Content);
+
+            // Act
+            newRule.Enabled = false;
+
+            request = new HttpRequest(Constants.TELEMETRY_ADDRESS + "/rules/" + newRule.Id);
+            request.AddHeader("X-Foo", "Bar");
+            request.AddHeader("Content-Type", "application/json");
+            request.SetContent(JsonConvert.SerializeObject(newRule));
+
+            var updateResponse = this.httpClient.PutAsync(request).Result;
+            var updatedRule = JsonConvert.DeserializeObject<RuleApiModel>(updateResponse.Content);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, updateResponse.StatusCode);
+            Assert.Equal(newRule.Enabled, updatedRule.Enabled);
+
+            this.rulesCreated.Add(updatedRule.Id); // Track new rule for deletion
+        }
+
+        [Fact, Trait(Constants.TEST, Constants.INTEGRATION_TEST)]
+        public void DeleteRuleReturnsOK_IfRuleExists()
+        {
+            string ruleId = "TESTRULEID" + DateTime.Now.ToString("yyyyMMddHHmmss");
+
+            // Arrange  
+            Assert.True(this.ValidChillerGroup()); // Make sure device groups have been created by seed data
+            var ruleRequest = this.GetSampleRuleWithCalculation("Average", "600000");
+
+            var request = new HttpRequest(Constants.TELEMETRY_ADDRESS + "/rules/" + ruleId);
+            request.AddHeader("X-Foo", "Bar");
+            request.AddHeader("Content-Type", "application/json");
+            request.SetContent(JsonConvert.SerializeObject(ruleRequest));
+
+            var response = this.httpClient.PutAsync(request).Result;
+
+            // Act
+            request = new HttpRequest(Constants.TELEMETRY_ADDRESS + "/rules/" + ruleId);
+            request.AddHeader("X-Foo", "Bar");
+
+            response = this.httpClient.DeleteAsync(request).Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
 
         private RuleApiModel GetSampleRuleWithCalculation(string calculation, string timePeriod)
@@ -247,8 +339,8 @@ namespace Telemetry
 
             return new RuleApiModel()
             {
-                Name = "Instant Rule",
-                Description = "Instant Description",
+                Name = calculation + " Test Rule",
+                Description = "Test Description",
                 GroupId = DEFAULT_CHILLERS_GROUP_ID,
                 Severity = "Info",
                 Enabled = true,
