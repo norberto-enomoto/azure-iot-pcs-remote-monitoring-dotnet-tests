@@ -17,8 +17,6 @@ start_containers() {
     ./scripts/storageadapter.sh start
     ./scripts/pcsconfig.sh start
     ./scripts/telemetry.sh start
-    ./scripts/devicesimulation.sh start
-    ./scripts/telemetry.sh start
     docker ps -a
 }
 
@@ -29,8 +27,6 @@ stop_containers() {
     docker ps -a
     ./scripts/storageadapter.sh stop
     ./scripts/pcsconfig.sh stop
-    ./scripts/telemetry.sh stop
-    ./scripts/devicesimulation.sh stop
     ./scripts/telemetry.sh stop
 }
 

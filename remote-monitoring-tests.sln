@@ -17,6 +17,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{1968E3EB-88DD-4CF5-A56F-B3C33699F78A}"
 	ProjectSection(SolutionItems) = preProject
 		scripts\.functions.sh = scripts\.functions.sh
+		scripts\asamanager.sh = scripts\asamanager.sh
 		scripts\build = scripts\build
 		scripts\devicesimulation.sh = scripts\devicesimulation.sh
 		scripts\env.list = scripts\env.list
@@ -25,6 +26,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{1968
 		scripts\storageadapter.sh = scripts\storageadapter.sh
 		scripts\telemetry-agent.sh = scripts\telemetry-agent.sh
 		scripts\telemetry.sh = scripts\telemetry.sh
+		scripts\containers.sh = scripts\containers.sh
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "git", "git", "{12F978DA-1CFF-48A5-AACE-CEA1255FE5D6}"
