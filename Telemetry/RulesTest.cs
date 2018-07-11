@@ -7,9 +7,6 @@ using Helpers;
 using Helpers.Http;
 using Helpers.Models;
 using Newtonsoft.Json;
-using System.Net;
-using Helpers;
-using Helpers.Http;
 using Xunit;
 
 namespace Telemetry
