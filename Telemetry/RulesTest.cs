@@ -201,6 +201,39 @@ namespace Telemetry
             this.rulesCreated.Add(ruleResponse.Id); // Track new rule for deletion
         }
 
+        [Fact, Trait(Constants.TEST, Constants.INTEGRATION_TEST)]
+        public void PutCreatesRuleWithId_IfValid()
+        {
+            string ruleId = "TESTRULEID" + DateTime.Now.ToString("yyyyMMddHHmmss");
+
+            // Arrange  
+            Assert.True(this.ValidChillerGroup()); // Make sure device groups have been created by seed data
+            var ruleRequest = this.GetSampleRuleWithCalculation("Average", "600000");
+
+            // Act
+            var request = new HttpRequest(Constants.TELEMETRY_ADDRESS + "/rules/" + ruleId);
+            request.AddHeader("X-Foo", "Bar");
+            request.AddHeader("Content-Type", "application/json");
+            request.SetContent(JsonConvert.SerializeObject(ruleRequest));
+
+            var response = this.httpClient.PutAsync(request).Result;
+            var ruleResponse = JsonConvert.DeserializeObject<RuleApiModel>(response.Content);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal(ruleRequest.Name, ruleResponse.Name);
+            Assert.Equal(ruleRequest.Description, ruleResponse.Description);
+            Assert.Equal(ruleRequest.GroupId, ruleResponse.GroupId);
+            Assert.Equal(ruleRequest.Severity, ruleResponse.Severity);
+            Assert.Equal(ruleRequest.Enabled, ruleResponse.Enabled);
+            Assert.Equal(ruleRequest.Calculation, ruleResponse.Calculation);
+            Assert.Equal(ruleRequest.Conditions[0].Field, ruleResponse.Conditions[0].Field);
+            Assert.Equal(ruleRequest.Conditions[0].Operator, ruleResponse.Conditions[0].Operator);
+            Assert.Equal(ruleRequest.Conditions[0].Value, ruleResponse.Conditions[0].Value);
+
+            this.rulesCreated.Add(ruleResponse.Id); // Track new rule for deletion
+        }
+
         private RuleApiModel GetSampleRuleWithCalculation(string calculation, string timePeriod)
         {
             var condition = new ConditionApiModel()
