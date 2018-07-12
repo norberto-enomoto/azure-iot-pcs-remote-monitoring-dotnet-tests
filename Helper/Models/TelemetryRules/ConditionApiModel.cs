@@ -2,7 +2,7 @@
 
 using Newtonsoft.Json;
 
-namespace Helpers.Models
+namespace Helpers.Models.TelemetryRules
 {
     public class ConditionApiModel
     {

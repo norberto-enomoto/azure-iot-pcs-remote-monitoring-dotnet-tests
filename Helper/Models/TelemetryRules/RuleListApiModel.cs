@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace Helpers.Models
+namespace Helpers.Models.TelemetryRules
 {
     public class RuleListApiModel
     {
@@ -15,7 +15,7 @@ namespace Helpers.Models
             get { return this.items; }
         }
 
-        [JsonProperty(PropertyName = "$metadata", Order = 1000)]
+        [JsonProperty(PropertyName = "$metadata")]
         public IDictionary<string, string> Metadata => new Dictionary<string, string>
         {
             { "$type", "RuleList;1" },

@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace Helpers.Models
+namespace Helpers.Models.TelemetryRules
 {
     public class RuleApiModel
     {
@@ -48,14 +48,14 @@ namespace Helpers.Models
         [JsonProperty(PropertyName = "TimePeriod")]
         public string TimePeriod { get; set; } = "0";
 
-        [JsonProperty(PropertyName = "$metadata", Order = 1000)]
+        [JsonProperty(PropertyName = "$metadata")]
         public IDictionary<string, string> Metadata => new Dictionary<string, string>
         {
             { "$type", "Rule;1"},
             { "$uri", "/v1/rules/" + this.Id }
         };
 
-        [JsonProperty(PropertyName = "Deleted", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty(PropertyName = "Deleted")]
         public bool? Deleted { get; set; }
 
         public RuleApiModel() { }
