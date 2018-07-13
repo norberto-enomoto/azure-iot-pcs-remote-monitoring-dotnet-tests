@@ -13,7 +13,7 @@ using Xunit.Abstractions;
 namespace Telemetry
 {
     [Collection("Telemetry Tests")]
-    public class RulesTest
+    public class RulesTest : IDisposable
     {
         private readonly IHttpClient httpClient;
         private ITestOutputHelper logger;
@@ -32,30 +32,10 @@ namespace Telemetry
             this.httpClient = new HttpClient();
             this.logger = logger;
 
-            Assert.True(this.ValidChillerGroup()); // Make sure device groups have been created by seed data
+            // Make sure device groups have been created by seed data
+            Assert.True(this.ValidChillerGroup());
 
             this.disposeRulesList = new List<string>();
-        }
-
-        /// <summary>
-        /// Try to delete all created rules upon completion.
-        /// Each unit test should add the id of any rules created
-        /// to the disposeRuleslist.
-        /// </summary>
-        ~RulesTest()
-        {
-            this.logger.WriteLine("Rules test cleanup: Deleting " + this.disposeRulesList.Count + " rules.");
-
-            foreach (var ruleId in this.disposeRulesList)
-            {
-                var request = new HttpRequest(Constants.TELEMETRY_ADDRESS + "/rules/" + ruleId);
-
-                var response = this.httpClient.DeleteAsync(request).Result;
-                if (response.StatusCode != HttpStatusCode.OK)
-                {
-                    this.logger.WriteLine("Unable to delete test rule id:" + ruleId);
-                }
-            }
         }
 
         /// <summary>
@@ -88,7 +68,8 @@ namespace Telemetry
             var response = this.httpClient.PostAsync(request).Result;
             var ruleResponse = JsonConvert.DeserializeObject<RuleApiModel>(response.Content);
 
-            this.disposeRulesList.Add(ruleResponse.Id); // Dispose after tests run
+            // Dispose after tests run
+            this.disposeRulesList.Add(ruleResponse.Id);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -117,7 +98,8 @@ namespace Telemetry
             var response = this.httpClient.PostAsync(request).Result;
             var ruleResponse = JsonConvert.DeserializeObject<RuleApiModel>(response.Content);
 
-            this.disposeRulesList.Add(ruleResponse.Id); // Dispose after tests run
+            // Dispose after tests run
+            this.disposeRulesList.Add(ruleResponse.Id);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -146,7 +128,8 @@ namespace Telemetry
             var response = this.httpClient.PostAsync(request).Result;
             var ruleResponse = JsonConvert.DeserializeObject<RuleApiModel>(response.Content);
 
-            this.disposeRulesList.Add(ruleResponse.Id); // Dispose after tests run
+            // Dispose after tests run
+            this.disposeRulesList.Add(ruleResponse.Id);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -175,7 +158,8 @@ namespace Telemetry
             var response = this.httpClient.PostAsync(request).Result;
             var ruleResponse = JsonConvert.DeserializeObject<RuleApiModel>(response.Content);
 
-            this.disposeRulesList.Add(ruleResponse.Id); // Dispose after tests run
+            // Dispose after tests run
+            this.disposeRulesList.Add(ruleResponse.Id);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -203,7 +187,8 @@ namespace Telemetry
             var newRuleResponse = this.httpClient.PostAsync(request).Result;
             var newRule = JsonConvert.DeserializeObject<RuleApiModel>(newRuleResponse.Content);
 
-            this.disposeRulesList.Add(newRule.Id); // Dispose after tests run
+            // Dispose after tests run
+            this.disposeRulesList.Add(newRule.Id);
 
             // Act
             request = new HttpRequest(Constants.TELEMETRY_ADDRESS + RULES_ENDPOINT_SUFFIX + "/" + newRule.Id);
@@ -244,7 +229,8 @@ namespace Telemetry
             var response = this.httpClient.PutAsync(request).Result;
             var ruleResponse = JsonConvert.DeserializeObject<RuleApiModel>(response.Content);
 
-            this.disposeRulesList.Add(ruleResponse.Id); // Track new rule for deletion
+            // Dispose after tests run
+            this.disposeRulesList.Add(ruleResponse.Id);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -284,7 +270,8 @@ namespace Telemetry
             var updateResponse = this.httpClient.PutAsync(request).Result;
             var updatedRule = JsonConvert.DeserializeObject<RuleApiModel>(updateResponse.Content);
 
-            this.disposeRulesList.Add(updatedRule.Id); // Dispose after tests run
+            // Dispose after tests run
+            this.disposeRulesList.Add(updatedRule.Id);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, updateResponse.StatusCode);
@@ -305,7 +292,8 @@ namespace Telemetry
 
             var response = this.httpClient.PutAsync(request).Result;
 
-            this.disposeRulesList.Add(ruleId); // Dispose after tests run
+            // Dispose after tests run
+            this.disposeRulesList.Add(ruleId);
 
             // Act
             request = new HttpRequest(Constants.TELEMETRY_ADDRESS + RULES_ENDPOINT_SUFFIX + "/" + ruleId);
@@ -363,6 +351,27 @@ namespace Telemetry
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Try to delete all created rules upon completion.
+        /// Each unit test should add the id of any rules created
+        /// to the disposeRuleslist.
+        /// </summary>
+        public void Dispose()
+        {
+            this.logger.WriteLine("Rules test cleanup: Deleting " + this.disposeRulesList.Count + " rules.");
+
+            foreach (var ruleId in this.disposeRulesList)
+            {
+                var request = new HttpRequest(Constants.TELEMETRY_ADDRESS + "/rules/" + ruleId);
+
+                var response = this.httpClient.DeleteAsync(request).Result;
+                if (response.StatusCode != HttpStatusCode.OK)
+                {
+                    this.logger.WriteLine("Unable to delete test rule id:" + ruleId);
+                }
+            }
         }
     }
 }
