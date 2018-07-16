@@ -210,6 +210,9 @@ namespace Telemetry
             Assert.Equal(newRule.Conditions[0].Value, ruleResponse.Conditions[0].Value);
         }
 
+        /// <summary>
+        /// Verfies that a PUT with a provided ID will create a new rule with that id.
+        /// </summary>
         [Fact, Trait(Constants.TEST, Constants.INTEGRATION_TEST)]
         public void PutCreatesRuleWithId()
         {
