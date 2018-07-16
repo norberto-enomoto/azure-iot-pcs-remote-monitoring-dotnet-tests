@@ -210,9 +210,6 @@ namespace Telemetry
             Assert.Equal(newRule.Conditions[0].Value, ruleResponse.Conditions[0].Value);
         }
 
-        // TODO This test fails due to a discovered bug in Telemetry PUT request.
-        //      Fix PUT with an ID to create a rule with that ID and uncomment.
-        /*
         [Fact, Trait(Constants.TEST, Constants.INTEGRATION_TEST)]
         public void PutCreatesRuleWithId()
         {
@@ -245,7 +242,6 @@ namespace Telemetry
             Assert.Equal(ruleRequest.Conditions[0].Operator, ruleResponse.Conditions[0].Operator);
             Assert.Equal(ruleRequest.Conditions[0].Value, ruleResponse.Conditions[0].Value);
         }
-        */
 
         [Fact, Trait(Constants.TEST, Constants.INTEGRATION_TEST)]
         public void UpdatesExistingRuleToDisabled()
