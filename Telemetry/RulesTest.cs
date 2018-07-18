@@ -178,13 +178,14 @@ namespace Telemetry
         public void GetRuleById_ReturnsRule()
         {
             // Arrange  
+            string newRuleId = "TESTRULEID" + DateTime.Now.ToString("yyyyMMddHHmmss");
             var ruleRequest = this.GetSampleRuleWithCalculation("Average", "600000");
 
-            var request = new HttpRequest(Constants.TELEMETRY_ADDRESS + RULES_ENDPOINT_SUFFIX);
+            var request = new HttpRequest(Constants.TELEMETRY_ADDRESS + RULES_ENDPOINT_SUFFIX + "/" + newRuleId);
             request.AddHeader("Content-Type", "application/json");
             request.SetContent(JsonConvert.SerializeObject(ruleRequest));
 
-            var newRuleResponse = this.httpClient.PostAsync(request).Result;
+            var newRuleResponse = this.httpClient.PutAsync(request).Result;
             var newRule = JsonConvert.DeserializeObject<RuleApiModel>(newRuleResponse.Content);
 
             // Dispose after tests run
@@ -259,6 +260,9 @@ namespace Telemetry
             var newRuleResponse = this.httpClient.PostAsync(request).Result;
             var newRule = JsonConvert.DeserializeObject<RuleApiModel>(newRuleResponse.Content);
 
+            // Dispose after tests run
+            this.disposeRulesList.Add(newRule.Id);
+
             // Act
             newRule.Enabled = false;
 
@@ -268,9 +272,6 @@ namespace Telemetry
 
             var updateResponse = this.httpClient.PutAsync(request).Result;
             var updatedRule = JsonConvert.DeserializeObject<RuleApiModel>(updateResponse.Content);
-
-            // Dispose after tests run
-            this.disposeRulesList.Add(updatedRule.Id);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, updateResponse.StatusCode);
