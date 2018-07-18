@@ -18,7 +18,7 @@ namespace Telemetry
         private readonly IHttpClient httpClient;
         private ITestOutputHelper logger;
 
-        private const int MESSAGES_WAIT_MSEC = 30000;
+        private const int MESSAGES_WAIT_MSEC = 60000;
 
         private const string MESSAGES_ENDPOINT_SUFFIX = "/messages";
 
