@@ -178,7 +178,7 @@ namespace Telemetry
         public void GetRuleById_ReturnsRule()
         {
             // Arrange  
-            string newRuleId = "TESTRULEID" + DateTime.Now.ToString("yyyyMMddHHmmss");
+            string newRuleId = "TESTRULEID" + DateTime.UtcNow.ToString("yyyyMMddHHmmss") + "-" + Guid.NewGuid();
             var ruleRequest = this.GetSampleRuleWithCalculation("Average", "600000");
 
             var request = new HttpRequest(Constants.TELEMETRY_ADDRESS + RULES_ENDPOINT_SUFFIX + "/" + newRuleId);
@@ -217,7 +217,7 @@ namespace Telemetry
         [Fact, Trait(Constants.TEST, Constants.INTEGRATION_TEST)]
         public void PutCreatesRuleWithId()
         {
-            string newRuleId = "TESTRULEID" + DateTime.Now.ToString("yyyyMMddHHmmss");
+            string newRuleId = "TESTRULEID" + DateTime.UtcNow.ToString("yyyyMMddHHmmss") + "-" + Guid.NewGuid();
 
             // Arrange  
             var ruleRequest = this.GetSampleRuleWithCalculation("Average", "600000");
@@ -226,9 +226,12 @@ namespace Telemetry
             var request = new HttpRequest(Constants.TELEMETRY_ADDRESS + RULES_ENDPOINT_SUFFIX + "/" + newRuleId);
             request.AddHeader("Content-Type", "application/json");
             request.SetContent(JsonConvert.SerializeObject(ruleRequest));
+            this.logger.WriteLine("PUT request: " + request.Uri);
+            this.logger.WriteLine("PUT request body: " + request.Content);
 
             var response = this.httpClient.PutAsync(request).Result;
             var ruleResponse = JsonConvert.DeserializeObject<RuleApiModel>(response.Content);
+            this.logger.WriteLine("Response from PUT request: " + response.Content);
 
             // Dispose after tests run
             this.disposeRulesList.Add(ruleResponse.Id);
@@ -251,7 +254,7 @@ namespace Telemetry
         public void UpdatesExistingRuleToDisabled()
         {
             // Arrange  
-            string newRuleId = "TESTRULEID" + DateTime.Now.ToString("yyyyMMddHHmmss");
+            string newRuleId = "TESTRULEID" + DateTime.UtcNow.ToString("yyyyMMddHHmmss") + "-" + Guid.NewGuid();
             var ruleRequest = this.GetSampleRuleWithCalculation("Average", "600000");
 
             var request = new HttpRequest(Constants.TELEMETRY_ADDRESS + RULES_ENDPOINT_SUFFIX + "/" + newRuleId);
@@ -282,7 +285,7 @@ namespace Telemetry
         [Fact, Trait(Constants.TEST, Constants.INTEGRATION_TEST)]
         public void DeleteRuleReturnsOK_IfRuleExists()
         {
-            string ruleId = "TESTRULEID" + DateTime.Now.ToString("yyyyMMddHHmmss");
+            string ruleId = "TESTRULEID" + DateTime.UtcNow.ToString("yyyyMMddHHmmss") + "-" + Guid.NewGuid();
 
             // Arrange  
             var ruleRequest = this.GetSampleRuleWithCalculation("Average", "600000");
