@@ -226,9 +226,12 @@ namespace Telemetry
             var request = new HttpRequest(Constants.TELEMETRY_ADDRESS + RULES_ENDPOINT_SUFFIX + "/" + newRuleId);
             request.AddHeader("Content-Type", "application/json");
             request.SetContent(JsonConvert.SerializeObject(ruleRequest));
+            this.logger.WriteLine("PUT request: " + request.Uri);
+            this.logger.WriteLine("PUT request body: " + request.Content);
 
             var response = this.httpClient.PutAsync(request).Result;
             var ruleResponse = JsonConvert.DeserializeObject<RuleApiModel>(response.Content);
+            this.logger.WriteLine("Response from PUT request: " + response.Content);
 
             // Dispose after tests run
             this.disposeRulesList.Add(ruleResponse.Id);
