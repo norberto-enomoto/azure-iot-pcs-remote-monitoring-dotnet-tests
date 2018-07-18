@@ -203,7 +203,7 @@ namespace Telemetry
             var newRule = new RuleApiModel()
             {
                 Id = id,
-                Name = calculation + " Faulty Test Rule " + DateTime.Now.ToString("yyyyMMddHHmmss"),
+                Name = calculation + " Faulty Test Rule " + DateTime.UtcNow.ToString("yyyyMMddHHmmss") + "-" + Guid.NewGuid(),
                 Description = "Test Description",
                 GroupId = DEFAULT_CHILLERS_GROUP_ID,
                 Severity = "Info",
