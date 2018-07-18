@@ -251,13 +251,14 @@ namespace Telemetry
         public void UpdatesExistingRuleToDisabled()
         {
             // Arrange  
-            var newRuleRequest = this.GetSampleRuleWithCalculation("Average", "600000");
+            string newRuleId = "TESTRULEID" + DateTime.Now.ToString("yyyyMMddHHmmss");
+            var ruleRequest = this.GetSampleRuleWithCalculation("Average", "600000");
 
-            var request = new HttpRequest(Constants.TELEMETRY_ADDRESS + RULES_ENDPOINT_SUFFIX);
+            var request = new HttpRequest(Constants.TELEMETRY_ADDRESS + RULES_ENDPOINT_SUFFIX + "/" + newRuleId);
             request.AddHeader("Content-Type", "application/json");
-            request.SetContent(JsonConvert.SerializeObject(newRuleRequest));
+            request.SetContent(JsonConvert.SerializeObject(ruleRequest));
 
-            var newRuleResponse = this.httpClient.PostAsync(request).Result;
+            var newRuleResponse = this.httpClient.PutAsync(request).Result;
             var newRule = JsonConvert.DeserializeObject<RuleApiModel>(newRuleResponse.Content);
 
             // Dispose after tests run
