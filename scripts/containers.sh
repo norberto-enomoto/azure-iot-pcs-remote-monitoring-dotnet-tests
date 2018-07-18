@@ -25,44 +25,12 @@ stop() {
     ./scripts/asamanager.sh stop
 }
 
-#Script Args
-repo=""
-tag="testing"
-act="start"
-
-set_up_env() {
-    if [[ "$repo" == "dotnet" ]]; then
-        export REPO="dotnet"
-    elif [[ "$repo" == "java" ]]; then
-        export REPO="java"
-    else 
-        error "No microservice type specified, pass either 'dotnet' or 'java'."
-        echo "eg:- sh containers.sh -re java"
-        exit 1
-    fi
-	export DOCKER_TAG=$tag
-}
-
-while [[ $# -gt 0 ]] ;
-do
-    opt=$1;
-    shift;	
-    case $opt in
-        -dt|--dockertag) tag=$1; shift;;
-        -re|--repo) repo=$1; shift;;
-        -act|--action) act=$1; shift;;
-        *) shift;
-    esac
-done
-
-set_up_env
-
-if [[ "$act" == "start" ]]; then
+if [[ "$1" == "start" ]]; then
     start
     exit 0
 fi
 
-if [[ "$act" == "stop" ]]; then
+if [[ "$1" == "stop" ]]; then
     stop
     exit 0
 fi
