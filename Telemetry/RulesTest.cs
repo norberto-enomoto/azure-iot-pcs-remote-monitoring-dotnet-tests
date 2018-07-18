@@ -178,7 +178,7 @@ namespace Telemetry
         public void GetRuleById_ReturnsRule()
         {
             // Arrange  
-            string newRuleId = "TESTRULEID" + DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+            string newRuleId = "TESTRULEID" + DateTime.UtcNow.ToString("yyyyMMddHHmmss") + "-" + Guid.NewGuid();
             var ruleRequest = this.GetSampleRuleWithCalculation("Average", "600000");
 
             var request = new HttpRequest(Constants.TELEMETRY_ADDRESS + RULES_ENDPOINT_SUFFIX + "/" + newRuleId);
@@ -217,7 +217,7 @@ namespace Telemetry
         [Fact, Trait(Constants.TEST, Constants.INTEGRATION_TEST)]
         public void PutCreatesRuleWithId()
         {
-            string newRuleId = "TESTRULEID" + DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+            string newRuleId = "TESTRULEID" + DateTime.UtcNow.ToString("yyyyMMddHHmmss") + "-" + Guid.NewGuid();
 
             // Arrange  
             var ruleRequest = this.GetSampleRuleWithCalculation("Average", "600000");
@@ -254,7 +254,7 @@ namespace Telemetry
         public void UpdatesExistingRuleToDisabled()
         {
             // Arrange  
-            string newRuleId = "TESTRULEID" + DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+            string newRuleId = "TESTRULEID" + DateTime.UtcNow.ToString("yyyyMMddHHmmss") + "-" + Guid.NewGuid();
             var ruleRequest = this.GetSampleRuleWithCalculation("Average", "600000");
 
             var request = new HttpRequest(Constants.TELEMETRY_ADDRESS + RULES_ENDPOINT_SUFFIX + "/" + newRuleId);
@@ -285,7 +285,7 @@ namespace Telemetry
         [Fact, Trait(Constants.TEST, Constants.INTEGRATION_TEST)]
         public void DeleteRuleReturnsOK_IfRuleExists()
         {
-            string ruleId = "TESTRULEID" + DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+            string ruleId = "TESTRULEID" + DateTime.UtcNow.ToString("yyyyMMddHHmmss") + "-" + Guid.NewGuid();
 
             // Arrange  
             var ruleRequest = this.GetSampleRuleWithCalculation("Average", "600000");
