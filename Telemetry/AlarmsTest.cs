@@ -24,7 +24,7 @@ namespace Telemetry
         private string instantChillerRuleId;
         private string averageChillerRuleId;
         private const int ALARM_TRIGGER_WAIT_MSEC = 15000;
-        private const int ALARM_CHECK_RETRY_COUNT = 30;
+        private const int ALARM_CHECK_RETRY_COUNT = 70;
 
         private const string ALARMS_ENDPOINT_SUFFIX = "/alarms";
         private const string RULES_ENDPOINT_SUFFIX = "/rules";
