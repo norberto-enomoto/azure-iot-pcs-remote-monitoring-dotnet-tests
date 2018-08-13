@@ -1,4 +1,6 @@
-﻿using Helpers.Http;
+﻿// Copyright (c) Microsoft. All rights reserved.
+
+using Helpers.Http;
 using Helpers;
 using System;
 using System.Linq;
