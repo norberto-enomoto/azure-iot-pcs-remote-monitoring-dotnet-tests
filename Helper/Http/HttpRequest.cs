@@ -137,7 +137,7 @@ namespace Helpers.Http
         }
 
         public void SetContent<T>(T sourceObject, Encoding encoding, MediaTypeHeaderValue mediaType)
-        { 
+        {
             if (sourceObject is MultipartFormDataContent)
             {
                 this.requestContent.Content = sourceObject as MultipartFormDataContent;

@@ -49,18 +49,16 @@ namespace Config
         [Fact, Trait(Constants.TEST, Constants.INTEGRATION_TEST)]
         public void ShouldCreatePackage()
         {
+            // Arange
             var packageName = "testPackage";
             var packageType = PackageType.EDGE_MANIFEST;
             var jsonManifest = "{'key':'value'}";
 
-            // Arange
+            // Act
             var createdPackage = this.CreatePackage(packageName, packageType, jsonManifest);
 
-            // Act
-            var uploadedPackageResponse = this.RetrieveAndVerifyPackage(createdPackage.Id, packageName, packageType);
-
             // Assert
-            Assert.Equal(jsonManifest, uploadedPackageResponse);
+            Assert.False(string.IsNullOrEmpty(createdPackage.Id));
 
             // Dispose
             disposeList.Add(createdPackage.Id);
@@ -119,13 +117,10 @@ namespace Config
             var createdPkg = this.CreatePackage(packageName, packageType, jsonManifest);
             var createdPkgId = createdPkg.Id;
 
-            var response = this.RetrievePackage(createdPkgId);
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
             // Act
             this.DeletePackage(createdPkgId);
 
-            response = this.RetrievePackage(createdPkgId);
+            var response = this.RetrievePackage(createdPkgId);
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
@@ -135,7 +130,7 @@ namespace Config
         {
             // Arange
             var request = this.CreatePackageRequestWithPackageModel(packageType, content, packageName);
-            
+
             // Act
             var response = this.httpClient.PostAsync(request).Result;
             var responsePackage = JsonConvert.DeserializeObject<PackageApiModel>(response.Content);
@@ -143,22 +138,8 @@ namespace Config
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.Equal(packageName, responsePackage.Name);
-            Assert.Equal(content, responsePackage.Content);
 
             return responsePackage;
-        }
-
-        private String RetrieveAndVerifyPackage(string packageId, string packageName, PackageType type)
-        {
-            var response = this.RetrievePackage(packageId);
-
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            var uploadedPackage = JsonConvert.DeserializeObject<PackageApiModel>(response.Content);
-            Assert.Equal(type, uploadedPackage.Type);
-            Assert.Equal(packageId, uploadedPackage.Id);
-            Assert.Equal(packageName, uploadedPackage.Name);
-
-            return uploadedPackage.Content;
         }
 
         private IHttpResponse RetrievePackage(string packageId)
@@ -203,7 +184,7 @@ namespace Config
         {
             foreach (string packageId in disposeList)
             {
-                //this.DeletePackage(packageId);
+                this.DeletePackage(packageId);
             }
         }
     }
