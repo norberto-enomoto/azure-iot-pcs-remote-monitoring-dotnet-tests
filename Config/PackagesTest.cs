@@ -58,9 +58,11 @@ namespace Config
 
             // Act
             var createdPackage = this.CreatePackage(packageName, packageType, jsonManifest);
+            var uploadedPackageResponse = this.RetrieveAndVerifyPackage(createdPackage.Id, packageName, packageType);
 
             // Assert
             Assert.False(string.IsNullOrEmpty(createdPackage.Id));
+            Assert.Equal(jsonManifest, uploadedPackageResponse);
 
             // Dispose
             disposeList.Add(createdPackage.Id);
@@ -115,14 +117,17 @@ namespace Config
             var packageType = PackageType.EDGE_MANIFEST;
             var jsonManifest = "{'blah':'blah'}";
 
-            // Arange
+            // Arrange
             var createdPkg = this.CreatePackage(packageName, packageType, jsonManifest);
             var createdPkgId = createdPkg.Id;
+
+            var response = this.RetrievePackage(createdPkgId);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             // Act
             this.DeletePackage(createdPkgId);
 
-            var response = this.RetrievePackage(createdPkgId);
+            response = this.RetrievePackage(createdPkgId);
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
@@ -140,8 +145,20 @@ namespace Config
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.Equal(packageName, responsePackage.Name);
+            Assert.Equal(content, responsePackage.Content);
 
             return responsePackage;
+        }
+
+        private String RetrieveAndVerifyPackage(string packageId, string packageName, PackageType type)
+        {
+            var response = this.RetrievePackage(packageId);
+             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var uploadedPackage = JsonConvert.DeserializeObject<PackageApiModel>(response.Content);
+            Assert.Equal(type, uploadedPackage.Type);
+            Assert.Equal(packageId, uploadedPackage.Id);
+            Assert.Equal(packageName, uploadedPackage.Name);
+             return uploadedPackage.Content;
         }
 
         private IHttpResponse RetrievePackage(string packageId)

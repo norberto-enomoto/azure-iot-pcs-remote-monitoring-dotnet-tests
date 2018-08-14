@@ -23,6 +23,9 @@ namespace Config
         [JsonProperty(PropertyName = "DateCreated")]
         public string DateCreated { get; set; } = DateTimeOffset.UtcNow.ToString(DATE_FORMAT);
 
+        [JsonProperty("Content")]
+        public string Content { get; set; }
+
     }
 
     public enum PackageType
